@@ -1,0 +1,48 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.dylib
+
+# Virtual envs
+.venv/
+venv/
+ENV/
+env/
+
+# Env files
+.env
+.env.*
+!.env.example
+
+# Build / dist / meta
+dist/
+build/
+*.egg-info/
+
+# Testing / coverage / caches
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.cache/
+.mypy_cache/
+.ruff_cache/
+
+# Editors (keep VS Code settings.json committed)
+.vscode/*
+!.vscode/settings.json
+.idea/
+*.code-workspace
+
+# OS cruft
+.DS_Store
+Thumbs.db
+
+# Node (if used later)
+node_modules/
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
