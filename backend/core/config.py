@@ -5,7 +5,7 @@ import os
 # For dev use not production.
 try:
     from dotenv import load_dotenv  
-    ROOT_DIR = Path(__file__).resolve().parents[2]  
+    ROOT_DIR = Path(__file__).resolve().parents[2] # D&D/monster_manager/
     load_dotenv(ROOT_DIR / ".env")
 except Exception:
     pass

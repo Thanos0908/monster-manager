@@ -12,7 +12,7 @@ settings = get_settings()
 BASE_DIR = Path(__file__).resolve().parent
 
 # Paths for templates and static files
-TEMPLATES_DIR = BASE_DIR / "templates_"
+TEMPLATES_DIR = BASE_DIR / "templates"
 STATIC_DIR = BASE_DIR / "static"
 
 # Create the FastAPI application instance
