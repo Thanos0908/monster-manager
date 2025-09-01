@@ -30,6 +30,7 @@ htmlcov/
 .cache/
 .mypy_cache/
 .ruff_cache/
+coverage.xml
 
 # Editors (keep VS Code settings.json committed)
 .vscode/*
@@ -46,3 +47,13 @@ node_modules/
 npm-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+
+# Local artifacts / logs
+*.log
+*.zip
+.ipynb_checkpoints/
+.python-version
+
+# Our local snapshot helpers
+monster-backend-snapshot_*.md
+make_backend_snapshot.ps1
