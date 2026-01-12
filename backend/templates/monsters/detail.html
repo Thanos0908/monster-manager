@@ -34,6 +34,19 @@
       {% endif %}
     </div>
 
+    {% if current_user and current_user.role.value == "ADMIN" and not monster.is_official %}
+      <div class="mt-2 text-sm text-slate-300">
+        <span class="text-slate-400">Submitted by:</span>
+        {% if monster.owner %}
+          {{ monster.owner.email }}
+          {% if monster.owner.username %} ({{ monster.owner.username }}){% endif %}
+        {% else %}
+          <span class="text-slate-500">Unknown (user deleted)</span>
+        {% endif %}
+      </div>
+    {% endif %}
+    
+
     {% if success == "created" %}
       <div class="mt-6 rounded-md border border-emerald-900/60 bg-emerald-950/40 px-4 py-3 text-emerald-200">
         Monster created successfully.

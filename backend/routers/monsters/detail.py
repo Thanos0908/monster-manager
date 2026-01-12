@@ -28,7 +28,8 @@ async def monster_detail(
 ):
     stmt = (
         select(Monster)
-        .options(selectinload(Monster.movements), 
+        .options(selectinload(Monster.owner),
+                 selectinload(Monster.movements), 
                  selectinload(Monster.senses),
                  selectinload(Monster.languages),
                  selectinload(Monster.damage_immunities),
