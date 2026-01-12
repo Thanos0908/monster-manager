@@ -1,0 +1,37 @@
+<nav class="border-b border-slate-800 bg-slate-950/60">
+  <div class="mx-auto max-w-5xl px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-4">
+      <span
+        class="font-semibold text-slate-100 cursor-default"
+        aria-label="D&D Monster Manager"
+      >
+        D&amp;D Monster Manager
+      </span>
+
+      {% set is_logged_in = (actor_role is defined and actor_role) or (current_user is defined and current_user) %}
+
+      {% if is_logged_in %}
+        <a
+          href="/dashboard"
+          class="rounded-md px-2 py-1 text-sm text-slate-300 hover:bg-slate-900 hover:text-white"
+          title="Go to dashboard"
+        >
+          Main Page
+        </a>
+      {% endif %}
+    </div>
+
+    <div class="flex items-center gap-3 text-sm">
+      {% if is_logged_in %}
+        <form method="post" action="/auth/logout">
+          <button
+            type="submit"
+            class="rounded-lg border border-slate-700 px-3 py-1.5 text-slate-100 hover:bg-slate-900"
+          >
+            Logout
+          </button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+</nav>

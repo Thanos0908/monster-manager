@@ -1,0 +1,948 @@
+{# Monster Create (SSR)#}
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="mx-auto max-w-5xl px-4 py-8">
+    <div class="flex items-start justify-between gap-4">
+      <div>
+        <h1 class="text-2xl font-bold tracking-tight">{{ page_title or "Monster Create" }}</h1>
+        <p class="mt-2 text-sm text-slate-300">
+          Fill in the fields below. The form is server-rendered and validated on submit.
+        </p>
+      </div>
+
+      <div class="flex shrink-0 items-center gap-2">
+        <a
+          href="/monsters"
+          class="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm font-medium text-slate-100 hover:bg-slate-900"
+        >
+          Back to Monsters
+        </a>
+      </div>
+    </div>
+
+    {% if global_errors %}
+      <div class="mt-6 rounded-md border border-red-900/60 bg-red-950/40 px-4 py-3 text-red-200" role="alert">
+        <ul class="list-disc pl-5 space-y-1">
+          {% for err in global_errors %}
+            <li>{{ err }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    <div class="mt-6 rounded-lg border border-slate-800 bg-slate-950/60 p-6 shadow-sm">
+      <form method="post" action="{{ form_action or '/monsters/new' }}" novalidate class="space-y-8 monster-create">
+        <div class="text-sm text-slate-300">
+          <span class="font-semibold text-slate-100">{{ submit_button_text }}</span>
+        </div>
+
+        <div class="space-y-8">
+          <!-- Name -->
+          <div class="field grid grid-cols-1 gap-2 md:grid-cols-[220px_1fr] md:gap-x-6">
+            <label for="name" class="text-sm font-medium text-slate-200 md:pt-2">Name</label>
+            <div>
+              <input
+                id="name"
+                type="text"
+                name="name"
+                value="{{ form.get('name', '') }}"
+                required
+                class="w-full rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100"
+              >
+              {% if field_errors.get("name") %}
+                <div class="mt-2 rounded-md border border-red-900/60 bg-red-950/40 px-3 py-2 text-sm text-red-200" role="alert">
+                  <ul class="list-disc pl-5 space-y-1">
+                    {% for err in field_errors["name"] %}
+                      <li>{{ err }}</li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Size -->
+          <div class="field grid grid-cols-1 gap-2 md:grid-cols-[220px_1fr] md:gap-x-6">
+            <label for="size" class="text-sm font-medium text-slate-200 md:pt-2">Size</label>
+            <div>
+              <select
+                id="size"
+                name="size"
+                required
+                class="w-full rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100"
+              >
+                <option value="">— Select size —</option>
+                {% for s in enums.Size %}
+                  <option value="{{ s }}" {% if form.get("size") == s %}selected{% endif %}>{{ s }}</option>
+                {% endfor %}
+              </select>
+              {% if field_errors.get("size") %}
+                <div class="mt-2 rounded-md border border-red-900/60 bg-red-950/40 px-3 py-2 text-sm text-red-200" role="alert">
+                  <ul class="list-disc pl-5 space-y-1">
+                    {% for err in field_errors["size"] %}
+                      <li>{{ err }}</li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Type -->
+          <div class="field grid grid-cols-1 gap-2 md:grid-cols-[220px_1fr] md:gap-x-6">
+            <label for="main_type" class="text-sm font-medium text-slate-200 md:pt-2">Type</label>
+            <div>
+              <input
+                id="main_type"
+                type="text"
+                name="main_type"
+                value="{{ form.get('main_type', '') }}"
+                required
+                class="w-full rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100"
+              >
+              {% if field_errors.get("main_type") %}
+                <div class="mt-2 rounded-md border border-red-900/60 bg-red-950/40 px-3 py-2 text-sm text-red-200" role="alert">
+                  <ul class="list-disc pl-5 space-y-1">
+                    {% for err in field_errors["main_type"] %}
+                      <li>{{ err }}</li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Subtype -->
+          <div class="field grid grid-cols-1 gap-2 md:grid-cols-[220px_1fr] md:gap-x-6">
+            <label for="subtype" class="text-sm font-medium text-slate-200 md:pt-2">
+              Subtype <span class="text-slate-400 font-normal">(optional)</span>
+            </label>
+            <div>
+              <input
+                id="subtype"
+                type="text"
+                name="subtype"
+                value="{{ form.get('subtype', '') }}"
+                class="w-full rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100"
+              >
+              <small class="mt-2 block text-xs text-slate-400">Example: goblinoid, shapechanger, demon.</small>
+              {% if field_errors.get("subtype") %}
+                <div class="mt-2 rounded-md border border-red-900/60 bg-red-950/40 px-3 py-2 text-sm text-red-200" role="alert">
+                  <ul class="list-disc pl-5 space-y-1">
+                    {% for err in field_errors["subtype"] %}
+                      <li>{{ err }}</li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Backstory -->
+          <div class="field grid grid-cols-1 gap-2 md:grid-cols-[220px_1fr] md:gap-x-6">
+            <label for="backstory" class="text-sm font-medium text-slate-200 md:pt-2">
+              Backstory <span class="text-slate-400 font-normal">(optional)</span>
+            </label>
+            <div>
+              <textarea
+                id="backstory"
+                name="backstory"
+                rows="6"
+                class="w-full rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100"
+              >{{ form.get("backstory", "") }}</textarea>
+              <small class="mt-2 block text-xs text-slate-400">Short lore, origin, motivations, or campaign notes.</small>
+              {% if field_errors.get("backstory") %}
+                <div class="mt-2 rounded-md border border-red-900/60 bg-red-950/40 px-3 py-2 text-sm text-red-200" role="alert">
+                  <ul class="list-disc pl-5 space-y-1">
+                    {% for err in field_errors["backstory"] %}
+                      <li>{{ err }}</li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Traits (builder -> traits_json) -->
+          <div class="field grid grid-cols-1 gap-2 md:grid-cols-[220px_1fr] md:gap-x-6">
+            <label class="text-sm font-medium text-slate-200 md:pt-2">
+              Traits <span class="text-slate-400 font-normal">(optional)</span>
+            </label>
+            <div>
+              <small class="block text-xs text-slate-400">
+                Use the fields below. The form will generate the required JSON automatically.
+              </small>
+              <div id="traits-rows" class="mt-3 space-y-3"></div>
+              <div class="mt-3 flex gap-2">
+                <button
+                  type="button"
+                  id="traits-add"
+                  class="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 hover:bg-slate-900"
+                >
+                  + Add trait
+                </button>
+              </div>
+              <textarea id="traits_json" name="traits_json" hidden>{{ form.get("traits_json", "") }}</textarea>
+              {% if field_errors.get("traits_json") %}
+                <div class="mt-2 rounded-md border border-red-900/60 bg-red-950/40 px-3 py-2 text-sm text-red-200" role="alert">
+                  <ul class="list-disc pl-5 space-y-1">
+                    {% for err in field_errors["traits_json"] %}
+                      <li>{{ err }}</li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Actions (builder -> actions_json) -->
+          <div class="field grid grid-cols-1 gap-2 md:grid-cols-[220px_1fr] md:gap-x-6">
+            <label class="text-sm font-medium text-slate-200 md:pt-2">
+              Actions <span class="text-slate-400 font-normal">(optional)</span>
+            </label>
+            <div>
+              <small class="block text-xs text-slate-400">
+                Enter actions using the fields below. The form will generate the required JSON automatically.
+              </small>
+              <div id="actions-rows" class="mt-3 space-y-3"></div>
+              <div class="mt-3 flex gap-2">
+                <button
+                  type="button"
+                  id="actions-add"
+                  class="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 hover:bg-slate-900"
+                >
+                  + Add action
+                </button>
+              </div>
+              <textarea id="actions_json" name="actions_json" hidden>{{ form.get("actions_json", "") }}</textarea>
+              {% if field_errors.get("actions_json") %}
+                <div class="mt-2 rounded-md border border-red-900/60 bg-red-950/40 px-3 py-2 text-sm text-red-200" role="alert">
+                  <ul class="list-disc pl-5 space-y-1">
+                    {% for err in field_errors["actions_json"] %}
+                      <li>{{ err }}</li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Reactions (builder -> reactions_json) -->
+          <div class="field grid grid-cols-1 gap-2 md:grid-cols-[220px_1fr] md:gap-x-6">
+            <label class="text-sm font-medium text-slate-200 md:pt-2">
+              Reactions <span class="text-slate-400 font-normal">(optional)</span>
+            </label>
+            <div>
+              <small class="block text-xs text-slate-400">
+                Enter reactions using the fields below. The form will generate the required JSON automatically.
+              </small>
+              <div id="reactions-rows" class="mt-3 space-y-3"></div>
+              <div class="mt-3 flex gap-2">
+                <button
+                  type="button"
+                  id="reactions-add"
+                  class="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 hover:bg-slate-900"
+                >
+                  + Add reaction
+                </button>
+              </div>
+              <textarea id="reactions_json" name="reactions_json" hidden>{{ form.get("reactions_json", "") }}</textarea>
+              {% if field_errors.get("reactions_json") %}
+                <div class="mt-2 rounded-md border border-red-900/60 bg-red-950/40 px-3 py-2 text-sm text-red-200" role="alert">
+                  <ul class="list-disc pl-5 space-y-1">
+                    {% for err in field_errors["reactions_json"] %}
+                      <li>{{ err }}</li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Legendary Actions (builder -> legendary_actions_json) -->
+          <div class="field grid grid-cols-1 gap-2 md:grid-cols-[220px_1fr] md:gap-x-6">
+            <label class="text-sm font-medium text-slate-200 md:pt-2">
+              Legendary Actions <span class="text-slate-400 font-normal">(optional)</span>
+            </label>
+            <div>
+              <small class="block text-xs text-slate-400">
+                Enter legendary actions using the fields below. The form will generate the required JSON automatically.
+              </small>
+              <div id="legendary-actions-rows" class="mt-3 space-y-3"></div>
+              <div class="mt-3 flex gap-2">
+                <button
+                  type="button"
+                  id="legendary-actions-add"
+                  class="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 hover:bg-slate-900"
+                >
+                  + Add legendary action
+                </button>
+              </div>
+              <textarea id="legendary_actions_json" name="legendary_actions_json" hidden>{{ form.get("legendary_actions_json", "") }}</textarea>
+              {% if field_errors.get("legendary_actions_json") %}
+                <div class="mt-2 rounded-md border border-red-900/60 bg-red-950/40 px-3 py-2 text-sm text-red-200" role="alert">
+                  <ul class="list-disc pl-5 space-y-1">
+                    {% for err in field_errors["legendary_actions_json"] %}
+                      <li>{{ err }}</li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Lair Actions (newline list) -->
+          <div class="field grid grid-cols-1 gap-2 md:grid-cols-[220px_1fr] md:gap-x-6">
+            <label for="lair_actions_text" class="text-sm font-medium text-slate-200 md:pt-2">
+              Lair Actions <span class="text-slate-400 font-normal">(optional)</span>
+            </label>
+            <div>
+              <textarea
+                id="lair_actions_text"
+                name="lair_actions_text"
+                rows="6"
+                placeholder="One lair action per line..."
+                class="w-full rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100"
+              >{{ form.get("lair_actions_text", "") }}</textarea>
+              <small class="mt-2 block text-xs text-slate-400">Enter one lair action per line. Blank lines will be ignored.</small>
+              {% if field_errors.get("lair_actions_text") %}
+                <div class="mt-2 rounded-md border border-red-900/60 bg-red-950/40 px-3 py-2 text-sm text-red-200" role="alert">
+                  <ul class="list-disc pl-5 space-y-1">
+                    {% for err in field_errors["lair_actions_text"] %}
+                      <li>{{ err }}</li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Regional Effects (newline list) -->
+          <div class="field grid grid-cols-1 gap-2 md:grid-cols-[220px_1fr] md:gap-x-6">
+            <label for="regional_effects_text" class="text-sm font-medium text-slate-200 md:pt-2">
+              Regional Effects <span class="text-slate-400 font-normal">(optional)</span>
+            </label>
+            <div>
+              <textarea
+                id="regional_effects_text"
+                name="regional_effects_text"
+                rows="6"
+                placeholder="One regional effect per line..."
+                class="w-full rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100"
+              >{{ form.get("regional_effects_text", "") }}</textarea>
+              <small class="mt-2 block text-xs text-slate-400">Enter one regional effect per line. Blank lines will be ignored.</small>
+              {% if field_errors.get("regional_effects_text") %}
+                <div class="mt-2 rounded-md border border-red-900/60 bg-red-950/40 px-3 py-2 text-sm text-red-200" role="alert">
+                  <ul class="list-disc pl-5 space-y-1">
+                    {% for err in field_errors["regional_effects_text"] %}
+                      <li>{{ err }}</li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Alignment -->
+          <div class="field grid grid-cols-1 gap-2 md:grid-cols-[220px_1fr] md:gap-x-6">
+            <label for="alignment" class="text-sm font-medium text-slate-200 md:pt-2">Alignment</label>
+            <div>
+              <select
+                id="alignment"
+                name="alignment"
+                required
+                class="w-full rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100"
+              >
+                <option value="">— Select alignment —</option>
+                {% for a in enums.Alignment %}
+                  <option value="{{ a }}" {% if form.get("alignment") == a %}selected{% endif %}>{{ a }}</option>
+                {% endfor %}
+              </select>
+
+              {% if field_errors.get("alignment") %}
+                <div class="mt-2 rounded-md border border-red-900/60 bg-red-950/40 px-3 py-2 text-sm text-red-200" role="alert">
+                  <ul class="list-disc pl-5 space-y-1">
+                    {% for err in field_errors["alignment"] %}
+                      <li>{{ err }}</li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Challenge Rating -->
+          <div class="field grid grid-cols-1 gap-2 md:grid-cols-[220px_1fr] md:gap-x-6">
+            <label for="challenge_rating" class="text-sm font-medium text-slate-200 md:pt-2">Challenge Rating</label>
+            <div>
+              <select
+                id="challenge_rating"
+                name="challenge_rating"
+                required
+                class="w-full rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100"
+              >
+                <option value="">— Select CR —</option>
+                {% for cr in enums.CR %}
+                  <option value="{{ cr }}" {% if form.get("challenge_rating") == cr %}selected{% endif %}>{{ cr }}</option>
+                {% endfor %}
+              </select>
+
+              {% if field_errors.get("challenge_rating") %}
+                <div class="mt-2 rounded-md border border-red-900/60 bg-red-950/40 px-3 py-2 text-sm text-red-200" role="alert">
+                  <ul class="list-disc pl-5 space-y-1">
+                    {% for err in field_errors["challenge_rating"] %}
+                      <li>{{ err }}</li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- XP Override -->
+          <div class="field grid grid-cols-1 gap-2 md:grid-cols-[220px_1fr] md:gap-x-6">
+            <label for="xp_override" class="text-sm font-medium text-slate-200 md:pt-2">
+              XP Override <span class="text-slate-400 font-normal">(optional)</span>
+            </label>
+            <div>
+              <input
+                id="xp_override"
+                type="number"
+                name="xp_override"
+                min="0"
+                step="1"
+                value="{{ form.get('xp_override', '') }}"
+                class="w-full rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100"
+              >
+              <small class="mt-2 block text-xs text-slate-400">Only used when CR is 0 (allowed values: 0 or 10).</small>
+
+              {% if field_errors.get("xp_override") %}
+                <div class="mt-2 rounded-md border border-red-900/60 bg-red-950/40 px-3 py-2 text-sm text-red-200" role="alert">
+                  <ul class="list-disc pl-5 space-y-1">
+                    {% for err in field_errors["xp_override"] %}
+                      <li>{{ err }}</li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Armor Class -->
+          <div class="field grid grid-cols-1 gap-2 md:grid-cols-[220px_1fr] md:gap-x-6">
+            <label for="armor_class_text" class="text-sm font-medium text-slate-200 md:pt-2">Armor Class</label>
+            <div>
+              <input
+                id="armor_class_text"
+                type="text"
+                name="armor_class_text"
+                value="{{ form.get('armor_class_text', '') }}"
+                required
+                class="w-full rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100"
+              >
+
+              {% if field_errors.get("armor_class_text") %}
+                <div class="mt-2 rounded-md border border-red-900/60 bg-red-950/40 px-3 py-2 text-sm text-red-200" role="alert">
+                  <ul class="list-disc pl-5 space-y-1">
+                    {% for err in field_errors["armor_class_text"] %}
+                      <li>{{ err }}</li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Hit Points -->
+          <div class="field grid grid-cols-1 gap-2 md:grid-cols-[220px_1fr] md:gap-x-6">
+            <label for="hit_points" class="text-sm font-medium text-slate-200 md:pt-2">Hit Points</label>
+            <div>
+              <input
+                id="hit_points"
+                type="number"
+                name="hit_points"
+                min="1"
+                step="1"
+                value="{{ form.get('hit_points', '') }}"
+                required
+                class="w-full rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100"
+              >
+
+              {% if field_errors.get("hit_points") %}
+                <div class="mt-2 rounded-md border border-red-900/60 bg-red-950/40 px-3 py-2 text-sm text-red-200" role="alert">
+                  <ul class="list-disc pl-5 space-y-1">
+                    {% for err in field_errors["hit_points"] %}
+                      <li>{{ err }}</li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Hit Points Dice -->
+          <div class="field grid grid-cols-1 gap-2 md:grid-cols-[220px_1fr] md:gap-x-6">
+            <label for="hit_points_dice" class="text-sm font-medium text-slate-200 md:pt-2">Hit Points Dice</label>
+            <div>
+              <input
+                id="hit_points_dice"
+                type="text"
+                name="hit_points_dice"
+                value="{{ form.get('hit_points_dice', '') }}"
+                placeholder="e.g. 3d8+6"
+                required
+                class="w-full rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100"
+              >
+              <small class="mt-2 block text-xs text-slate-400">Format: XdY+Z (examples: 2d6, 6d8+18)</small>
+
+              {% if field_errors.get("hit_points_dice") %}
+                <div class="mt-2 rounded-md border border-red-900/60 bg-red-950/40 px-3 py-2 text-sm text-red-200" role="alert">
+                  <ul class="list-disc pl-5 space-y-1">
+                    {% for err in field_errors["hit_points_dice"] %}
+                      <li>{{ err }}</li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Passive Perception -->
+          <div class="field grid grid-cols-1 gap-2 md:grid-cols-[220px_1fr] md:gap-x-6">
+            <label for="passive_perception" class="text-sm font-medium text-slate-200 md:pt-2">Passive Perception</label>
+            <div>
+              <input
+                id="passive_perception"
+                type="number"
+                name="passive_perception"
+                min="1"
+                step="1"
+                value="{{ form.get('passive_perception', '') }}"
+                required
+                class="w-full rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100"
+              >
+
+              {% if field_errors.get("passive_perception") %}
+                <div class="mt-2 rounded-md border border-red-900/60 bg-red-950/40 px-3 py-2 text-sm text-red-200" role="alert">
+                  <ul class="list-disc pl-5 space-y-1">
+                    {% for err in field_errors["passive_perception"] %}
+                      <li>{{ err }}</li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Telepathy -->
+          <div class="field grid grid-cols-1 gap-2 md:grid-cols-[220px_1fr] md:gap-x-6">
+            <label for="telepathy_range" class="text-sm font-medium text-slate-200 md:pt-2">
+              Telepathy Range (ft) <span class="text-slate-400 font-normal">(optional)</span>
+            </label>
+            <div>
+              <input
+                id="telepathy_range"
+                type="number"
+                name="telepathy_range"
+                min="0"
+                step="1"
+                value="{{ form.get('telepathy_range', '') }}"
+                class="w-full rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100"
+              >
+              <small class="mt-2 block text-xs text-slate-400">Leave blank if the monster has no telepathy.</small>
+
+              {% if field_errors.get("telepathy_range") %}
+                <div class="mt-2 rounded-md border border-red-900/60 bg-red-950/40 px-3 py-2 text-sm text-red-200" role="alert">
+                  <ul class="list-disc pl-5 space-y-1">
+                    {% for err in field_errors["telepathy_range"] %}
+                      <li>{{ err }}</li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Ability Scores -->
+          <div class="field grid grid-cols-1 gap-2 md:grid-cols-[220px_1fr] md:gap-x-6">
+            <label class="text-sm font-medium text-slate-200 md:pt-2">Ability Scores</label>
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {% for ab in ["STR","DEX","CON","INT","WIS","CHA"] %}
+                {% set key = "ability_scores." ~ ab %}
+                <div>
+                  <label for="ability_scores_{{ ab }}" class="block text-xs font-medium text-slate-300">{{ ab }}</label>
+                  <input
+                    id="ability_scores_{{ ab }}"
+                    type="number"
+                    name="{{ key }}"
+                    min="1"
+                    max="30"
+                    step="1"
+                    value="{{ form.get(key, '') }}"
+                    required
+                    class="mt-1 w-full rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100"
+                  >
+                  {% if field_errors.get(key) %}
+                    <div class="mt-2 rounded-md border border-red-900/60 bg-red-950/40 px-3 py-2 text-sm text-red-200" role="alert">
+                      <ul class="list-disc pl-5 space-y-1">
+                        {% for err in field_errors[key] %}
+                          <li>{{ err }}</li>
+                        {% endfor %}
+                      </ul>
+                    </div>
+                  {% endif %}
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="field grid grid-cols-1 gap-2 md:grid-cols-[220px_1fr] md:gap-x-6">
+            <label class="text-sm font-medium text-slate-200 md:pt-2">
+              Saving Throw Proficiencies <span class="text-slate-400 font-normal">(optional)</span>
+            </label>
+            <div>
+              <small class="block text-xs text-slate-400">
+                Enter the proficiency bonus for each saving throw the monster is proficient in (leave blank if not proficient).
+              </small>
+
+              <div class="mt-3 grid grid-cols-2 gap-3 md:grid-cols-3">
+                {% for ab in ["STR", "DEX", "CON", "INT", "WIS", "CHA"] %}
+                  {% set key = "saving_throws.bonuses." ~ ab %}
+                  <label class="inline-flex items-center gap-2 text-sm text-slate-200">
+                    <span class="w-10 text-slate-300">{{ ab }}</span>
+                    <input
+                      type="number"
+                      inputmode="numeric"
+                      min="0"
+                      max="30"
+                      class="w-24 rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100"
+                      name="{{ key }}"
+                      value="{{ form.get(key, '') }}"
+                      placeholder="—"
+                    >
+                  </label>
+
+                  {% if field_errors.get(key) %}
+                    <div class="md:col-span-3 mt-2 rounded-md border border-red-900/60 bg-red-950/40 px-3 py-2 text-sm text-red-200" role="alert">
+                      <ul class="list-disc pl-5 space-y-1">
+                        {% for err in field_errors[key] %}
+                          <li>{{ err }}</li>
+                        {% endfor %}
+                      </ul>
+                    </div>
+                  {% endif %}
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+
+          <div class="field grid grid-cols-1 gap-2 md:grid-cols-[220px_1fr] md:gap-x-6">
+            <label class="text-sm font-medium text-slate-200 md:pt-2">
+              Skill Proficiencies <span class="text-slate-400 font-normal">(optional)</span>
+            </label>
+            <div>
+              <small class="block text-xs text-slate-400">
+                Enter the proficiency bonus for each skill the monster is proficient in (leave blank if not proficient).
+              </small>
+
+              <div class="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
+                {% for sk in [
+                  "Acrobatics","Animal Handling","Arcana","Athletics","Deception","History",
+                  "Insight","Intimidation","Investigation","Medicine","Nature","Perception",
+                  "Performance","Persuasion","Religion","Sleight of Hand","Stealth","Survival"
+                ] %}
+                  {% set key = "skills.bonuses." ~ sk %}
+                  <label class="flex items-center justify-between gap-3 text-sm text-slate-200">
+                    <span class="text-slate-300">{{ sk }}</span>
+                    <input
+                      type="number"
+                      inputmode="numeric"
+                      min="0"
+                      max="30"
+                      class="w-24 rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100"
+                      name="{{ key }}"
+                      value="{{ form.get(key, '') }}"
+                      placeholder="—"
+                    >
+                  </label>
+
+                  {% if field_errors.get(key) %}
+                    <div class="md:col-span-2 mt-2 rounded-md border border-red-900/60 bg-red-950/40 px-3 py-2 text-sm text-red-200" role="alert">
+                      <ul class="list-disc pl-5 space-y-1">
+                        {% for err in field_errors[key] %}
+                          <li>{{ err }}</li>
+                        {% endfor %}
+                      </ul>
+                    </div>
+                  {% endif %}
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+
+          <!-- Movement (dynamic indexed rows) -->
+          <div class="field grid grid-cols-1 gap-2 md:grid-cols-[220px_1fr] md:gap-x-6">
+            <label class="text-sm font-medium text-slate-200 md:pt-2">
+              Movement <span class="text-slate-400 font-normal">(optional)</span>
+            </label>
+            <div>
+              <small class="block text-xs text-slate-400">Add as many movement modes as needed.</small>
+
+              <div id="movement-rows" class="mt-3 space-y-3"></div>
+
+              <div class="mt-3">
+                <button
+                  type="button"
+                  id="movement-add"
+                  class="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 hover:bg-slate-900"
+                >
+                  + Add movement
+                </button>
+              </div>
+
+              <div id="movement-existing" hidden>
+                {% for i in range(0, 50) %}
+                  <input data-existing="movement" data-idx="{{ i }}" data-key="type" value="{{ form.get('movement[' ~ i ~ '].type', '') }}">
+                  <input data-existing="movement" data-idx="{{ i }}" data-key="speed" value="{{ form.get('movement[' ~ i ~ '].speed', '') }}">
+                  <input data-existing="movement" data-idx="{{ i }}" data-key="hover" value="{{ form.get('movement[' ~ i ~ '].hover', '') }}">
+                {% endfor %}
+              </div>
+
+              {% if field_errors.get("movement") %}
+                <div class="mt-2 rounded-md border border-red-900/60 bg-red-950/40 px-3 py-2 text-sm text-red-200" role="alert">
+                  <ul class="list-disc pl-5 space-y-1">
+                    {% for err in field_errors["movement"] %}
+                      <li>{{ err }}</li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Senses (dynamic indexed rows) -->
+          <div class="field grid grid-cols-1 gap-2 md:grid-cols-[220px_1fr] md:gap-x-6">
+            <label class="text-sm font-medium text-slate-200 md:pt-2">
+              Senses <span class="text-slate-400 font-normal">(optional)</span>
+            </label>
+            <div>
+              <small class="block text-xs text-slate-400">Add senses and their ranges.</small>
+
+              <div id="senses-rows" class="mt-3 space-y-3"></div>
+
+              <div class="mt-3">
+                <button
+                  type="button"
+                  id="senses-add"
+                  class="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 hover:bg-slate-900"
+                >
+                  + Add sense
+                </button>
+              </div>
+
+              <div id="senses-existing" hidden>
+                {% for i in range(0, 50) %}
+                  <input data-existing="senses" data-idx="{{ i }}" data-key="sense" value="{{ form.get('senses[' ~ i ~ '].sense', '') }}">
+                  <input data-existing="senses" data-idx="{{ i }}" data-key="range" value="{{ form.get('senses[' ~ i ~ '].range', '') }}">
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+
+          <!-- Languages (dynamic indexed rows) -->
+          <div class="field grid grid-cols-1 gap-2 md:grid-cols-[220px_1fr] md:gap-x-6">
+            <label class="text-sm font-medium text-slate-200 md:pt-2">
+              Languages <span class="text-slate-400 font-normal">(optional)</span>
+            </label>
+            <div>
+              <small class="block text-xs text-slate-400">Add one language per row.</small>
+
+              <div id="languages-rows" class="mt-3 space-y-3"></div>
+
+              <div class="mt-3">
+                <button
+                  type="button"
+                  id="languages-add"
+                  class="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 hover:bg-slate-900"
+                >
+                  + Add language
+                </button>
+              </div>
+
+              <div id="languages-existing" hidden>
+                {% for i in range(0, 50) %}
+                  <input data-existing="languages" data-idx="{{ i }}" data-key="language" value="{{ form.get('languages[' ~ i ~ '].language', '') }}">
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+
+          <div class="field grid grid-cols-1 gap-2 md:grid-cols-[220px_1fr] md:gap-x-6">
+            <label class="text-sm font-medium text-slate-200 md:pt-2">
+              Damage Resistances <span class="text-slate-400 font-normal">(optional)</span>
+            </label>
+            <div>
+              <small class="block text-xs text-slate-400">Add one damage type per row.</small>
+
+              <div id="damage-resistances-rows" class="mt-3 space-y-3"></div>
+
+              <div class="mt-3">
+                <button
+                  type="button"
+                  id="damage-resistances-add"
+                  class="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 hover:bg-slate-900"
+                >
+                  + Add resistance
+                </button>
+              </div>
+
+              <div id="damage-resistances-existing" hidden>
+                {% for i in range(0, 50) %}
+                  <input
+                    data-existing="damage_resistances"
+                    data-idx="{{ i }}"
+                    data-key="type"
+                    value="{{ form.get('damage_resistances[' ~ i ~ '].type', '') }}"
+                  >
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+
+          <div class="field grid grid-cols-1 gap-2 md:grid-cols-[220px_1fr] md:gap-x-6">
+            <label class="text-sm font-medium text-slate-200 md:pt-2">
+              Damage Immunities <span class="text-slate-400 font-normal">(optional)</span>
+            </label>
+            <div>
+              <small class="block text-xs text-slate-400">Add one damage type per row.</small>
+
+              <div id="damage-immunities-rows" class="mt-3 space-y-3"></div>
+
+              <div class="mt-3">
+                <button
+                  type="button"
+                  id="damage-immunities-add"
+                  class="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 hover:bg-slate-900"
+                >
+                  + Add immunity
+                </button>
+              </div>
+
+              <div id="damage-immunities-existing" hidden>
+                {% for i in range(0, 50) %}
+                  <input
+                    data-existing="damage_immunities"
+                    data-idx="{{ i }}"
+                    data-key="type"
+                    value="{{ form.get('damage_immunities[' ~ i ~ '].type', '') }}"
+                  >
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+
+          <div class="field grid grid-cols-1 gap-2 md:grid-cols-[220px_1fr] md:gap-x-6">
+            <label class="text-sm font-medium text-slate-200 md:pt-2">
+              Damage Vulnerabilities <span class="text-slate-400 font-normal">(optional)</span>
+            </label>
+            <div>
+              <small class="block text-xs text-slate-400">Add one damage type per row.</small>
+
+              <div id="damage-vulnerabilities-rows" class="mt-3 space-y-3"></div>
+
+              <div class="mt-3">
+                <button
+                  type="button"
+                  id="damage-vulnerabilities-add"
+                  class="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 hover:bg-slate-900"
+                >
+                  + Add vulnerability
+                </button>
+              </div>
+
+              <div id="damage-vulnerabilities-existing" hidden>
+                {% for i in range(0, 50) %}
+                  <input
+                    data-existing="damage_vulnerabilities"
+                    data-idx="{{ i }}"
+                    data-key="type"
+                    value="{{ form.get('damage_vulnerabilities[' ~ i ~ '].type', '') }}"
+                  >
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+
+          <div class="field grid grid-cols-1 gap-2 md:grid-cols-[220px_1fr] md:gap-x-6">
+            <label class="text-sm font-medium text-slate-200 md:pt-2">
+              Condition Immunities <span class="text-slate-400 font-normal">(optional)</span>
+            </label>
+            <div>
+              <small class="block text-xs text-slate-400">Add one condition per row.</small>
+
+              <div id="condition-immunities-rows" class="mt-3 space-y-3"></div>
+
+              <div class="mt-3">
+                <button
+                  type="button"
+                  id="condition-immunities-add"
+                  class="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 hover:bg-slate-900"
+                >
+                  + Add condition immunity
+                </button>
+              </div>
+
+              <div id="condition-immunities-existing" hidden>
+                {% for i in range(0, 50) %}
+                  <input
+                    data-existing="condition_immunities"
+                    data-idx="{{ i }}"
+                    data-key="condition"
+                    value="{{ form.get('condition_immunities[' ~ i ~ '].condition', '') }}"
+                  >
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-2">
+            <button
+              type="submit"
+              class="rounded-md border border-slate-700 bg-slate-950/60 px-4 py-2 text-sm font-medium text-slate-100 hover:bg-slate-900"
+            >
+              {{ submit_button_text }}
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+  <script type="application/json" id="monster-create-enums">
+    {{ {
+      "MovementType": enums.MovementType,
+      "Sense": enums.Sense,
+      "Language": enums.Language,
+      "DamageType": enums.DamageType,
+      "Condition": enums.Condition,
+    } | tojson }}
+  </script>
+  <script>
+    window.MONSTER_ENUMS = JSON.parse(
+      document.getElementById("monster-create-enums").textContent
+    );
+  </script>
+  <script src="{{ url_for('static', path='js/monster_create_traits.js') }}"></script>
+  <script src="{{ url_for('static', path='js/monster_create_actions.js') }}"></script>
+  <script src="{{ url_for('static', path='js/monster_create_reactions.js') }}"></script>
+  <script src="{{ url_for('static', path='js/monster_create_legendary_actions.js') }}"></script>
+  <script src="{{ url_for('static', path='js/indexed_rows.js') }}"></script>
+  <script src="{{ url_for('static', path='js/monster_create_movement.js') }}"></script>
+  <script src="{{ url_for('static', path='js/monster_create_senses.js') }}"></script>
+  <script src="{{ url_for('static', path='js/monster_create_languages.js') }}"></script>
+  <script src="{{ url_for('static', path='js/monster_create_damage_lists.js') }}"></script>
+  <script src="{{ url_for('static', path='js/monster_create_condition_immunities.js') }}"></script>
+{% endblock %}

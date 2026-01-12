@@ -1,9 +1,15 @@
+"""SQLAlchemy model for monster senses (e.g., darkvision, blindsight)."""
+
 from __future__ import annotations
 import uuid
 from sqlalchemy import ForeignKey, Integer, String, UniqueConstraint, Index, CheckConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from backend.core.database import Base
 from backend.utils.mixins import ReprMixin
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from backend.models.monster import Monster
 
 class MonsterSense(Base, ReprMixin):
     """
@@ -24,7 +30,7 @@ class MonsterSense(Base, ReprMixin):
         ForeignKey("monsters.id", ondelete="CASCADE"),
         nullable=False,
     )
-    monster = relationship("Monster", back_populates="senses")
+    monster: Mapped["Monster"] = relationship("Monster", back_populates="senses")
 
     sense: Mapped[str] = mapped_column(String(32), nullable=False)
     range: Mapped[int] = mapped_column(Integer, nullable=False)  

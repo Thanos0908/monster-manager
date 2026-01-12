@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="mx-auto max-w-5xl px-4 py-10">
+    <h1 class="text-2xl font-bold text-slate-100">Dashboard</h1>
+    <p class="mt-2 text-slate-300">
+      Signed in as <span class="font-medium text-white">{{ current_user.email }}</span>
+    </p>
+
+    {% if current_user.is_approval_pending %}
+      <div class="mt-6 rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-amber-200">
+        Your account is pending admin approval. You can browse official content while you wait.
+      </div>
+    {% endif %}
+
+    <div class="mt-8 grid gap-4 sm:grid-cols-2">
+      <a href="/monsters" class="rounded-lg border border-slate-800 bg-slate-950/60 p-4 hover:bg-slate-900">
+        <div class="text-lg font-semibold text-white">Monsters</div>
+        <div class="mt-1 text-sm text-slate-300">Browse monsters (filtered by role)</div>
+      </a>
+
+      <a href="/profile" class="rounded-lg border border-slate-800 bg-slate-950/60 p-4 hover:bg-slate-900">
+        <div class="text-lg font-semibold text-white">Profile</div>
+        <div class="mt-1 text-sm text-slate-300">View/update your account</div>
+      </a>
+
+      {% if current_user.role.value == "ADMIN" %}
+        <a href="/admin/users" class="rounded-lg border border-slate-800 bg-slate-950/60 p-4 hover:bg-slate-900">
+          <div class="text-lg font-semibold text-white">Users</div>
+          <div class="mt-1 text-sm text-slate-300">Approve users, change roles, delete accounts</div>
+        </a>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,273 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="mx-auto max-w-5xl px-4 py-10">
+    <h1 class="text-2xl font-bold text-slate-100">Profile</h1>
+    <p class="mt-2 text-slate-300">
+      Manage your account information.
+    </p>
+
+    {% if success_message %}
+      <div class="mt-6 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-emerald-200">
+        {{ success_message }}
+      </div>
+    {% endif %}
+
+    {% if error_message %}
+      <div class="mt-6 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-red-200">
+        {{ error_message }}
+      </div>
+    {% endif %}
+
+    <div class="mt-8 grid gap-6 lg:grid-cols-2">
+      <!-- Account (editable) -->
+      <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-5">
+        <div class="flex items-start justify-between gap-4">
+          <h2 class="text-lg font-semibold text-white">Account</h2>
+        </div>
+
+        <form method="post" action="/profile" class="mt-4 space-y-4">
+          <div>
+            <label class="block text-sm text-slate-300">Email</label>
+            <input
+              type="email"
+              value="{{ current_user.email }}"
+              disabled
+              class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-900/50 px-3 py-2 text-sm text-slate-300"
+            />
+            <p class="mt-1 text-xs text-slate-500">Email editing will be added later.</p>
+          </div>
+
+          <div>
+            <label for="username" class="block text-sm text-slate-300">Username</label>
+            <input
+              id="username"
+              name="username"
+              type="text"
+              value="{{ current_user.username or '' }}"
+              class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-600"
+              placeholder="Pick a username"
+            />
+            <p class="mt-1 text-xs text-slate-500">Optional. Must be unique.</p>
+          </div>
+
+          <div>
+            <label for="name" class="block text-sm text-slate-300">Name</label>
+            <input
+              id="name"
+              name="name"
+              type="text"
+              value="{{ current_user.name or '' }}"
+              class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-600"
+              placeholder="Your display name"
+            />
+            <p class="mt-1 text-xs text-slate-500">Optional.</p>
+          </div>
+
+          <div class="pt-2">
+            <button
+              type="submit"
+              class="rounded-lg border border-slate-700 bg-slate-950 px-4 py-2 text-sm font-medium text-slate-100 hover:bg-slate-900"
+            >
+              Save changes
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Security & Providers -->
+      <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-5">
+        <h2 class="text-lg font-semibold text-white">Security & Providers</h2>
+
+        <dl class="mt-4 space-y-3 text-sm">
+          <div>
+            <dt class="text-slate-400">Local password</dt>
+            <dd class="mt-1 text-slate-100">
+              {% if current_user.hashed_password %}
+                Set
+              {% else %}
+                <span class="text-slate-400">Not set</span>
+              {% endif %}
+            </dd>
+            <div class="mt-2 text-xs text-slate-500">
+              {% if current_user.hashed_password %}
+                Change your password by confirming your current password.
+              {% else %}
+                Set a password to enable email + password login.
+              {% endif %}
+            </div>
+
+            <!-- Password set/change form -->
+            <div class="mt-4 rounded-lg border border-slate-800 bg-slate-950 p-4">
+              {% if current_user.hashed_password %}
+                <h3 class="text-sm font-semibold text-slate-100">Change password</h3>
+
+                <form method="post" action="/profile/password" class="mt-3 space-y-3">
+                  <div>
+                    <label for="current_password" class="block text-xs text-slate-300">Current password</label>
+                    <input
+                      id="current_password"
+                      name="current_password"
+                      type="password"
+                      required
+                      class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-600"
+                      placeholder="Current password"
+                    />
+                  </div>
+
+                  <div>
+                    <label for="new_password" class="block text-xs text-slate-300">New password</label>
+                    <input
+                      id="new_password"
+                      name="new_password"
+                      type="password"
+                      required
+                      class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-600"
+                      placeholder="At least 12 characters"
+                    />
+                  </div>
+
+                  <div>
+                    <label for="confirm_password" class="block text-xs text-slate-300">Confirm new password</label>
+                    <input
+                      id="confirm_password"
+                      name="confirm_password"
+                      type="password"
+                      required
+                      class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-600"
+                      placeholder="Repeat new password"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    class="rounded-lg border border-slate-700 bg-slate-950 px-4 py-2 text-sm font-medium text-slate-100 hover:bg-slate-900"
+                  >
+                    Change password
+                  </button>
+                </form>
+              {% else %}
+                <h3 class="text-sm font-semibold text-slate-100">Set a password</h3>
+
+                <form method="post" action="/profile/password" class="mt-3 space-y-3">
+                  <div>
+                    <label for="new_password" class="block text-xs text-slate-300">New password</label>
+                    <input
+                      id="new_password"
+                      name="new_password"
+                      type="password"
+                      required
+                      class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-600"
+                      placeholder="At least 12 characters"
+                    />
+                  </div>
+
+                  <div>
+                    <label for="confirm_password" class="block text-xs text-slate-300">Confirm password</label>
+                    <input
+                      id="confirm_password"
+                      name="confirm_password"
+                      type="password"
+                      required
+                      class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-600"
+                      placeholder="Repeat new password"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    class="rounded-lg border border-slate-700 bg-slate-950 px-4 py-2 text-sm font-medium text-slate-100 hover:bg-slate-900"
+                  >
+                    Set password
+                  </button>
+                </form>
+              {% endif %}
+            </div>
+          </div>
+
+          <div>
+            <dt class="text-slate-400">Google linked</dt>
+            <dd class="mt-1 text-slate-100">
+              {% if current_user.google_id %}
+                Yes
+              {% else %}
+                <span class="text-slate-400">No</span>
+              {% endif %}
+            </dd>
+          </div>
+
+          <div>
+            <dt class="text-slate-400">GitHub linked</dt>
+            <dd class="mt-1 text-slate-100">
+              {% if current_user.github_id %}
+                Yes
+              {% else %}
+                <span class="text-slate-400">No</span>
+              {% endif %}
+            </dd>
+          </div>
+        </dl>
+      </div>
+
+      <!-- Permissions -->
+      <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-5 lg:col-span-2">
+        <h2 class="text-lg font-semibold text-white">Permissions</h2>
+
+        <dl class="mt-4 grid gap-4 sm:grid-cols-2 text-sm">
+          <div>
+            <dt class="text-slate-400">Role</dt>
+            <dd class="mt-1 text-slate-100">
+              {{ current_user.role.value }}
+            </dd>
+            <div class="mt-1 text-xs text-slate-500">Only admins can change roles.</div>
+          </div>
+
+          <div>
+            <dt class="text-slate-400">Approval status</dt>
+            <dd class="mt-1 text-slate-100">
+              {% if current_user.is_approval_pending %}
+                <span class="text-amber-200">Pending approval</span>
+              {% else %}
+                Approved
+              {% endif %}
+            </dd>
+            <div class="mt-1 text-xs text-slate-500">Only admins can change approval status.</div>
+          </div>
+        </dl>
+      </div>
+
+      <!-- Danger zone -->
+      <div class="rounded-lg border border-red-500/30 bg-red-500/10 p-5 lg:col-span-2">
+        <h2 class="text-lg font-semibold text-red-200">Danger zone</h2>
+        <p class="mt-2 text-sm text-red-100/90">
+          Deleting your account is permanent.
+          <span class="font-medium">Your monsters will NOT be deleted</span>.
+        </p>
+
+        <form method="post" action="/profile/delete" class="mt-4 space-y-3">
+          <label class="flex items-start gap-2 text-sm text-red-100/90">
+            <input
+              type="checkbox"
+              name="confirm"
+              class="mt-1 h-4 w-4 rounded border-red-400/40 bg-slate-950"
+            />
+            <span>I understand this action is permanent and cannot be undone.</span>
+          </label>
+
+          <button
+            type="submit"
+            class="rounded-lg border border-red-400/40 bg-red-500/10 px-4 py-2 text-sm font-medium text-red-100 hover:bg-red-500/20"
+          >
+            Delete my account
+          </button>
+
+          {% if current_user.role.value == "ADMIN" %}
+            <p class="text-xs text-red-100/80">
+              Admin safety: you can only delete your account if there is at least one other admin remaining.
+            </p>
+          {% endif %}
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}

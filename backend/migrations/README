@@ -1,1 +1,24 @@
-Generic single-database configuration.
+# Database Migrations (Alembic)
+
+This project uses **Alembic** to manage database schema migrations.
+
+- Database: Postgres (Docker)
+- ORM: SQLAlchemy 2.0 (async)
+- Migrations: Alembic
+- Migration scripts live in: `backend/migrations/versions/`
+
+## How it works
+
+Alembic autogenerate needs access to the project's SQLAlchemy metadata.
+
+In `env.py`, we import `backend.models` so all ORM models are registered on `Base.metadata`.
+Autogenerate then compares `Base.metadata` against the current database schema.
+
+## Running migrations
+
+Run these commands from the environment where Alembic is installed and the app settings are available
+(i.e., where `DATABASE_URL` is configured via environment variables / `.env`).
+
+### Upgrade to latest
+```bash
+alembic upgrade head

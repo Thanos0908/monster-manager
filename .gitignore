@@ -34,7 +34,6 @@ coverage.xml
 
 # Editors (keep VS Code settings.json committed)
 .vscode/*
-!.vscode/settings.json
 .idea/
 *.code-workspace
 

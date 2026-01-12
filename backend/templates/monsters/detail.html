@@ -1,0 +1,278 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="mx-auto max-w-3xl px-4 py-8">
+    <div class="flex flex-wrap items-center gap-3">
+      <h1 class="text-2xl font-bold tracking-tight text-slate-100">{{ monster.name }}</h1>
+
+      {% if monster.is_official %}
+        <span class="inline-flex items-center rounded-full bg-emerald-950/40 px-2.5 py-1 text-xs font-semibold text-emerald-200 ring-1 ring-inset ring-emerald-900/60">
+          Official
+        </span>
+      {% else %}
+        <span class="inline-flex items-center rounded-full bg-slate-900/60 px-2.5 py-1 text-xs font-semibold text-slate-200 ring-1 ring-inset ring-slate-700">
+          Community Submission
+        </span>
+      {% endif %}
+
+      {% if current_user and current_user.role.value == "ADMIN" %}
+        <div class="ml-auto flex items-center gap-2">
+          <a
+            href="/monsters/{{ monster.id }}/edit"
+            class="inline-flex items-center rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm font-medium text-slate-100 hover:bg-slate-900"
+          >
+            Edit
+          </a>
+
+          <a
+            href="/monsters/{{ monster.id }}/delete"
+            class="inline-flex items-center rounded-md border border-red-900/60 bg-red-950/40 px-3 py-2 text-sm font-medium text-red-100 hover:bg-red-900/60"
+          >
+            Delete
+          </a>
+        </div>
+      {% endif %}
+    </div>
+
+    {% if success == "created" %}
+      <div class="mt-6 rounded-md border border-emerald-900/60 bg-emerald-950/40 px-4 py-3 text-emerald-200">
+        Monster created successfully.
+      </div>
+    {% elif success == "updated" %}
+      <div class="mt-6 rounded-md border border-emerald-900/60 bg-emerald-950/40 px-4 py-3 text-emerald-200">
+        Monster updated successfully.
+      </div>
+    {% endif %}
+
+    {# Core stats #}
+    <div class="mt-6 rounded-lg border border-slate-800 bg-slate-950/60 p-4 shadow-sm">
+      <dl class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div>
+          <dt class="text-xs uppercase tracking-wide text-slate-400">Armor Class</dt>
+          <dd class="text-slate-100">{{ monster.armor_class_text }}</dd>
+        </div>
+
+        <div>
+          <dt class="text-xs uppercase tracking-wide text-slate-400">Hit Points</dt>
+          <dd class="text-slate-100">{{ monster.hit_points }} ({{ monster.hit_points_dice }})</dd>
+        </div>
+
+        <div>
+          <dt class="text-xs uppercase tracking-wide text-slate-400">Passive Perception</dt>
+          <dd class="text-slate-100">{{ monster.passive_perception }}</dd>
+        </div>
+
+      </dl>
+
+      <div class="mt-4 space-y-3">
+        {% if monster.movements %}
+          <div class="rounded-lg border border-slate-800 bg-slate-950/40 p-4">
+            <dt class="text-xs uppercase tracking-wide text-slate-400">Speed</dt>
+            <dd class="mt-1 text-slate-100">
+              {% for m in monster.movements %}
+                {{ m.movement_type }} {{ m.speed }} ft.{% if m.hover %} (hover){% endif %}{% if not loop.last %}, {% endif %}
+              {% endfor %}
+            </dd>
+          </div>
+        {% endif %}
+
+        {% if monster.senses %}
+          <div class="rounded-lg border border-slate-800 bg-slate-950/40 p-4">
+            <dt class="text-xs uppercase tracking-wide text-slate-400">Senses</dt>
+            <dd class="mt-1 text-slate-100">
+              {% for s in monster.senses %}
+                {{ s.sense }}{% if s.range %} {{ s.range }} ft.{% endif %}{% if not loop.last %}, {% endif %}
+              {% endfor %}
+            </dd>
+          </div>
+        {% endif %}
+
+        {% if monster.languages %}
+          <div class="rounded-lg border border-slate-800 bg-slate-950/40 p-4">
+            <dt class="text-xs uppercase tracking-wide text-slate-400">Languages</dt>
+            <dd class="mt-1 text-slate-100">
+              {% for lang in monster.languages %}
+                {{ lang.language }}{% if not loop.last %}, {% endif %}
+              {% endfor %}
+            </dd>
+          </div>
+        {% endif %}
+
+        {% set has_damage = monster.damage_immunities or monster.damage_resistances or monster.damage_vulnerabilities %}
+        {% if has_damage %}
+          <div class="rounded-lg border border-slate-800 bg-slate-950/40 p-4">
+            <dt class="text-xs uppercase tracking-wide text-slate-400">Damage</dt>
+            <dd class="mt-2 text-slate-100 space-y-1">
+              {% if monster.damage_immunities %}
+                <div>
+                  <span class="text-slate-400">Immunities:</span>
+                  {% for d in monster.damage_immunities %}
+                    {{ d.damage_type }}{% if not loop.last %}, {% endif %}
+                  {% endfor %}
+                </div>
+              {% endif %}
+
+              {% if monster.damage_resistances %}
+                <div>
+                  <span class="text-slate-400">Resistances:</span>
+                  {% for d in monster.damage_resistances %}
+                    {{ d.damage_type }}{% if not loop.last %}, {% endif %}
+                  {% endfor %}
+                </div>
+              {% endif %}
+
+              {% if monster.damage_vulnerabilities %}
+                <div>
+                  <span class="text-slate-400">Vulnerabilities:</span>
+                  {% for d in monster.damage_vulnerabilities %}
+                    {{ d.damage_type }}{% if not loop.last %}, {% endif %}
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </dd>
+          </div>
+        {% endif %}
+
+        {% if monster.condition_immunities %}
+          <div class="rounded-lg border border-slate-800 bg-slate-950/40 p-4">
+            <dt class="text-xs uppercase tracking-wide text-slate-400">Condition Immunities</dt>
+            <dd class="mt-1 text-slate-100">
+              {% for c in monster.condition_immunities %}
+                {{ c.condition }}{% if not loop.last %}, {% endif %}
+              {% endfor %}
+            </dd>
+          </div>
+        {% endif %}
+
+        {% if monster.saving_throw_proficiencies and monster.saving_throw_proficiencies.get("bonuses") %}
+          <div class="rounded-lg border border-slate-800 bg-slate-950/40 p-4">
+            <dt class="text-xs uppercase tracking-wide text-slate-400">Saving Throws</dt>
+            <dd class="mt-1 text-slate-100">
+              {% for ab, bonus in monster.saving_throw_proficiencies["bonuses"].items() %}
+                {{ ab }} +{{ bonus }}{% if not loop.last %}, {% endif %}
+              {% endfor %}
+            </dd>
+          </div>
+        {% endif %}
+
+        {% if monster.skill_proficiencies and monster.skill_proficiencies.get("bonuses") %}
+          <div class="rounded-lg border border-slate-800 bg-slate-950/40 p-4">
+            <dt class="text-xs uppercase tracking-wide text-slate-400">Skills</dt>
+            <dd class="mt-1 text-slate-100">
+              {% for sk, bonus in monster.skill_proficiencies["bonuses"].items() %}
+                {{ sk }} +{{ bonus }}{% if not loop.last %}, {% endif %}
+              {% endfor %}
+            </dd>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    {# Traits #}
+    {% if monster.traits %}
+      <section class="mt-8">
+        <h2 class="text-lg font-semibold text-slate-100">Traits</h2>
+        <div class="mt-3 space-y-4">
+          {% for trait in monster.traits %}
+            <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-4 shadow-sm">
+              <h3 class="text-sm font-semibold text-slate-100">{{ trait.name }}</h3>
+              <div class="mt-2 text-sm text-slate-200 whitespace-pre-line">
+                {{ trait.text }}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </section>
+    {% endif %}
+
+    {# Actions #}
+    {% if monster.actions %}
+      <section class="mt-8">
+        <h2 class="text-lg font-semibold text-slate-100">Actions</h2>
+        <div class="mt-3 space-y-4">
+          {% for action in monster.actions %}
+            <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-4 shadow-sm">
+              <h3 class="text-sm font-semibold text-slate-100">{{ action.name }}</h3>
+              <div class="mt-2 text-sm text-slate-200 whitespace-pre-line">
+                {{ action.text }}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </section>
+    {% endif %}
+
+    {# Reactions #}
+    {% if monster.reactions %}
+      <section class="mt-8">
+        <h2 class="text-lg font-semibold text-slate-100">Reactions</h2>
+        <div class="mt-3 space-y-4">
+          {% for reaction in monster.reactions %}
+            <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-4 shadow-sm">
+              <h3 class="text-sm font-semibold text-slate-100">{{ reaction.name }}</h3>
+              <div class="mt-2 text-sm text-slate-200 whitespace-pre-line">
+                {{ reaction.text }}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </section>
+    {% endif %}
+
+    {# Legendary Actions #}
+    {% if monster.legendary_actions %}
+      <section class="mt-8">
+        <h2 class="text-lg font-semibold text-slate-100">Legendary Actions</h2>
+        {% if monster.legendary_actions_per_round %}
+          <p class="mt-1 text-sm text-slate-300">
+            The monster can take {{ monster.legendary_actions_per_round }} legendary actions, choosing from the options below.
+          </p>
+        {% endif %}
+        <div class="mt-3 space-y-4">
+          {% for la in monster.legendary_actions %}
+            <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-4 shadow-sm">
+              <h3 class="text-sm font-semibold text-slate-100">{{ la.name }}</h3>
+              <div class="mt-2 text-sm text-slate-200 whitespace-pre-line">
+                {{ la.text }}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </section>
+    {% endif %}
+
+    {# Lair Actions #}
+    {% if monster.lair_actions %}
+      <section class="mt-8">
+        <h2 class="text-lg font-semibold text-slate-100">Lair Actions</h2>
+        <ul class="mt-3 list-disc list-inside space-y-2 text-sm text-slate-200">
+          {% for action in monster.lair_actions %}
+            <li class="whitespace-pre-line">{{ action }}</li>
+          {% endfor %}
+        </ul>
+      </section>
+    {% endif %}
+
+    {# Regional Effects #}
+    {% if monster.regional_effects %}
+      <section class="mt-8">
+        <h2 class="text-lg font-semibold text-slate-100">Regional Effects</h2>
+        <ul class="mt-3 list-disc list-inside space-y-2 text-sm text-slate-200">
+          {% for effect in monster.regional_effects %}
+            <li class="whitespace-pre-line">{{ effect }}</li>
+          {% endfor %}
+        </ul>
+      </section>
+    {% endif %}
+
+    {# Backstory #}
+    {% if monster.backstory %}
+      <section class="mt-8">
+        <h2 class="text-lg font-semibold text-slate-100">Backstory</h2>
+        <div class="mt-3 rounded-lg border border-slate-800 bg-slate-950/60 p-4 text-sm text-slate-200 whitespace-pre-line shadow-sm">
+          {{ monster.backstory }}
+        </div>
+      </section>
+    {% endif %}
+  </div>
+{% endblock %}

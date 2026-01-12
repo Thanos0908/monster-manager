@@ -1,3 +1,5 @@
+"""Async SQLAlchemy engine/session setup and Base metadata for models."""
+
 from functools import lru_cache
 from typing import AsyncGenerator
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
@@ -5,7 +7,8 @@ from sqlalchemy.orm import DeclarativeBase
 from backend.core.config import get_settings
 from sqlalchemy import MetaData
 
-# Global naming conversion for cleaner migrations with Alembic. It avoids the auto-naming of contstarins and indexes and helps Alembic when comparing 
+
+# Global naming conversion for cleaner migrations with Alembic. It avoids the auto-naming of constraints and indexes and helps Alembic when comparing 
 # models to the DB. That way there are no unstable names that lead to noisy “rename constraint” operations—even if nothing meaningful changed.
 # A global naming convention makes names predictable and consistent, so migrations are cleaner and diffs are deterministic.
 metadata = MetaData(naming_convention={
@@ -49,8 +52,8 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
     Usage:
         async def route(session: AsyncSession = Depends(get_session)):
     """
-    async_session = get_session_factory()
-    async with async_session() as session:
+    session_factory = get_session_factory()
+    async with session_factory() as session:
         yield session
 
 
