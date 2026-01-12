@@ -12,6 +12,7 @@ if TYPE_CHECKING:
 
 
 class User(Base, ReprMixin, StrMixin):
+    """Application user account used for authentication and role-based access control."""
     __tablename__ = "users"
     __repr_attrs__ = ("id", "email", "role")
 
@@ -37,7 +38,8 @@ class User(Base, ReprMixin, StrMixin):
         SQLEnum(UserRole, name="user_role", native_enum=False),
         index=True, nullable=False, default=UserRole.PLAYER
     )
-    is_approval_pending: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, index=True)
+    # True until an admin approves the user account
+    is_approval_pending: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, index=True) 
 
     monsters: Mapped[list["Monster"]] = relationship(
         back_populates="owner",

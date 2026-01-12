@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="mx-auto max-w-5xl px-4 py-10">
+    <h1 class="text-2xl font-bold text-slate-100">Users</h1>
+    <p class="mt-2 text-slate-300">
+      Approve new accounts and manage roles.
+    </p>
+
+    {% if success_message %}
+      <div class="mt-6 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-emerald-200">
+        {{ success_message }}
+      </div>
+    {% endif %}
+
+    {% if error_message %}
+      <div class="mt-6 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-red-200">
+        {{ error_message }}
+      </div>
+    {% endif %}
+
+    <div class="mt-8 overflow-hidden rounded-lg border border-slate-800 bg-slate-950/60">
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-left text-sm">
+          <thead class="border-b border-slate-800 bg-slate-950">
+            <tr class="text-slate-300">
+              <th class="px-4 py-3 font-medium">Email</th>
+              <th class="px-4 py-3 font-medium">Username</th>
+              <th class="px-4 py-3 font-medium">Name</th>
+              <th class="px-4 py-3 font-medium">Role</th>
+              <th class="px-4 py-3 font-medium">Approval</th>
+              <th class="px-4 py-3 font-medium">Providers</th>
+              <th class="px-4 py-3 font-medium">Actions</th>
+            </tr>
+          </thead>
+
+          <tbody class="divide-y divide-slate-800">
+            {% for u in users %}
+              <tr class="text-slate-100">
+                <td class="px-4 py-3">
+                  <div class="flex items-center gap-2">
+                    <span class="font-medium">{{ u.email }}</span>
+                    {% if u.id == current_user.id %}
+                      <span class="rounded-full border border-slate-700 bg-slate-900 px-2 py-0.5 text-xs text-slate-300">(you)</span>
+                    {% endif %}
+                  </div>
+                </td>
+
+                <td class="px-4 py-3 text-slate-300">
+                  {{ u.username or "—" }}
+                </td>
+
+                <td class="px-4 py-3 text-slate-300">
+                  {{ u.name or "—" }}
+                </td>
+
+                <td class="px-4 py-3">
+                  <span class="rounded-md border border-slate-800 bg-slate-950 px-2 py-1 text-xs text-slate-200">
+                    {{ u.role.value }}
+                  </span>
+                </td>
+
+                <td class="px-4 py-3">
+                  {% if u.is_approval_pending %}
+                    <span class="rounded-md border border-amber-500/30 bg-amber-500/10 px-2 py-1 text-xs text-amber-200">
+                      Pending
+                    </span>
+                  {% else %}
+                    <span class="rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 text-xs text-emerald-200">
+                      Approved
+                    </span>
+                  {% endif %}
+                </td>
+
+                <td class="px-4 py-3">
+                  <div class="flex flex-wrap gap-2">
+                    {% if u.google_id %}
+                      <span class="rounded-md border border-slate-800 bg-slate-950 px-2 py-1 text-xs text-slate-200">Google</span>
+                    {% else %}
+                      <span class="rounded-md border border-slate-800 bg-slate-950 px-2 py-1 text-xs text-slate-500">Google</span>
+                    {% endif %}
+
+                    {% if u.github_id %}
+                      <span class="rounded-md border border-slate-800 bg-slate-950 px-2 py-1 text-xs text-slate-200">GitHub</span>
+                    {% else %}
+                      <span class="rounded-md border border-slate-800 bg-slate-950 px-2 py-1 text-xs text-slate-500">GitHub</span>
+                    {% endif %}
+                  </div>
+                </td>
+
+                <td class="px-4 py-3">
+                  <div class="flex flex-col gap-3">
+                    <!-- Approve -->
+                    {% if u.is_approval_pending %}
+                      <form method="post" action="/admin/users/{{ u.id }}/approve">
+                        <button
+                          type="submit"
+                          class="rounded-lg border border-amber-400/40 bg-amber-500/10 px-3 py-1.5 text-xs font-medium text-amber-200 hover:bg-amber-500/20"
+                        >
+                          Approve
+                        </button>
+                      </form>
+                    {% else %}
+                      <button
+                        type="button"
+                        disabled
+                        class="cursor-not-allowed rounded-lg border border-slate-800 bg-slate-950 px-3 py-1.5 text-xs font-medium text-slate-500"
+                      >
+                        Approved
+                      </button>
+                    {% endif %}
+
+                    <!-- Change role (only after approval, and not for ADMIN) -->
+                    {% if u.is_approval_pending %}
+                      <div class="text-xs text-slate-500">
+                        Approve first to change role.
+                      </div>
+                    {% elif u.role.value == "ADMIN" %}
+                      <div class="text-xs text-slate-500">
+                        Admin role is permanent.
+                      </div>
+                    {% else %}
+                      <form method="post" action="/admin/users/{{ u.id }}/role" class="flex items-center gap-2">
+                        <select
+                          name="role"
+                          class="rounded-lg border border-slate-800 bg-slate-950 px-2 py-1.5 text-xs text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-600"
+                        >
+                          {% for r in roles %}
+                            <option value="{{ r.value }}" {% if u.role == r %}selected{% endif %}>
+                              {{ r.value }}
+                            </option>
+                          {% endfor %}
+                        </select>
+
+                        <button
+                          type="submit"
+                          class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-1.5 text-xs font-medium text-slate-100 hover:bg-slate-900"
+                        >
+                          Update
+                        </button>
+                      </form>
+                    {% endif %}
+
+                    <!-- Delete (admins cannot be deleted) -->
+                    {% if u.role.value == "ADMIN" %}
+                      <button
+                        type="button"
+                        disabled
+                        class="cursor-not-allowed rounded-lg border border-slate-800 bg-slate-950 px-3 py-1.5 text-xs font-medium text-slate-500"
+                      >
+                        Delete (disabled)
+                      </button>
+                    {% else %}
+                      <form method="post" action="/admin/users/{{ u.id }}/delete">
+                        <button
+                          type="submit"
+                          class="rounded-lg border border-red-400/40 bg-red-500/10 px-3 py-1.5 text-xs font-medium text-red-200 hover:bg-red-500/20"
+                        >
+                          Delete
+                        </button>
+                      </form>
+                    {% endif %}
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}

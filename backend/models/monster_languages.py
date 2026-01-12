@@ -1,9 +1,15 @@
+"""SQLAlchemy model for monster languages."""
+
 from __future__ import annotations
 import uuid
 from sqlalchemy import ForeignKey, String, UniqueConstraint, Index
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from backend.core.database import Base
 from backend.utils.mixins import ReprMixin
+
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from backend.models.monster import Monster
 
 class MonsterLanguage(Base, ReprMixin):
     """
@@ -19,9 +25,8 @@ class MonsterLanguage(Base, ReprMixin):
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     monster_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("monsters.id", ondelete="CASCADE"),
-        nullable=False,                      
+        ForeignKey("monsters.id", ondelete="CASCADE"), nullable=False,                      
     )
-    monster = relationship("Monster", back_populates="languages")
+    monster: Mapped["Monster"] = relationship("Monster", back_populates="languages")
 
     language: Mapped[str] = mapped_column(String(64), nullable=False)

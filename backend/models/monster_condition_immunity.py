@@ -4,6 +4,10 @@ from sqlalchemy import ForeignKey, String, UniqueConstraint, Index
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from backend.core.database import Base
 from backend.utils.mixins import ReprMixin
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from backend.models.monster import Monster
 
 class MonsterConditionImmunity(Base, ReprMixin):
     """
@@ -20,10 +24,7 @@ class MonsterConditionImmunity(Base, ReprMixin):
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
 
-    monster_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("monsters.id", ondelete="CASCADE"),
-        nullable=False,
-    )
-    monster = relationship("Monster", back_populates="condition_immunities")
+    monster_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("monsters.id", ondelete="CASCADE"), nullable=False,)
+    monster: Mapped["Monster"] = relationship("Monster", back_populates="condition_immunities")
 
-    condition: Mapped[str] = mapped_column(String(32), nullable=False)
+    condition: Mapped[str] = mapped_column(String(32), nullable=False)  # Stored as string; validated against Condition enum in the API

@@ -1,14 +1,57 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ title }}</title>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}D&amp;D Monster Manager{% endblock %}</title>
+
+    <!-- Tailwind via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Small global overrides -->
     <link rel="stylesheet" href="{{ url_for('static', path='css/app.css') }}">
-    <link rel="icon" type="image/x-icon" href="{{ url_for('static', path='img/favicon.ico') }}">
-</head>
-<body>
-    <h1>Welcome to {{ title }}</h1>
-    <p>This is served from our FastAPI app</p>
-</body>
+  </head>
+
+  {# Role-based background (only for logged-in pages) #}
+  {% set role = "" %}
+
+  {# Prefer actor_role (primitive), but fall back to current_user.role.value #}
+  {% if actor_role is defined and actor_role %}
+    {% set role = actor_role | string | lower %}
+  {% elif current_user is defined and current_user and current_user.role is defined and current_user.role and current_user.role.value is defined %}
+    {% set role = current_user.role.value | string | lower %}
+  {% endif %}
+
+  {% set bg_file = "" %}
+  {% if role == "admin" %}
+    {% set bg_file = "admin_bg.png" %}
+  {% elif role == "dm" %}
+    {% set bg_file = "dm_bg.png" %}
+  {% elif role == "player" %}
+    {% set bg_file = "player_bg.png" %}
+  {% endif %}
+
+  <body
+    class="min-h-screen text-slate-100 bg-slate-950"
+    {% if bg_file %}
+      style="
+        background-image: url('{{ url_for('static', path='img/' ~ bg_file) }}');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+      "
+    {% endif %}
+  >
+    {% if current_user is defined or actor_role is defined %}
+      {% include "_partials/navbar.html" %}
+    {% endif %}
+
+    <main class="mx-auto max-w-5xl px-4 py-8">
+      {% block content %}{% endblock %}
+    </main>
+
+    {# Page-specific scripts (e.g. monster create builders) #}
+    {% block scripts %}{% endblock %}
+  </body>
 </html>
